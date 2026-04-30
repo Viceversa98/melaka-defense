@@ -87,7 +87,7 @@ export function RadarPlayArea({
 
   return (
     <div
-      className="relative min-h-[420px] flex-1 overflow-hidden border-b border-cyan-300/20 bg-cover bg-center bg-no-repeat"
+      className="relative min-h-0 flex-1 overflow-hidden border-b border-cyan-300/20 bg-cover bg-center bg-no-repeat"
       style={{ backgroundImage: `url(${LOCATION_SPRITE_URL})` }}
     >
       <div
@@ -95,13 +95,13 @@ export function RadarPlayArea({
         aria-hidden="true"
       />
       <div
-        className="pointer-events-none absolute right-4 top-4 z-50 flex w-full max-w-sm flex-col gap-2"
+        className="pointer-events-none absolute right-2 top-2 z-50 flex w-[min(100%,11rem)] max-w-[min(100%,18rem)] flex-col gap-1 sm:right-4 sm:top-4 sm:max-w-sm sm:gap-2"
         aria-live="polite"
         aria-label="Recent battle logs"
       >
-        {logs.slice(-5).map((log) => (
-          <div key={log.id} className="font-mono text-xs drop-shadow-[0_2px_8px_rgba(0,0,0,0.95)]">
-            <p className={`leading-5 ${getLogToneClassName(log.tone)}`}>{log.message}</p>
+        {logs.slice(-3).map((log) => (
+          <div key={log.id} className="font-mono text-[10px] drop-shadow-[0_2px_8px_rgba(0,0,0,0.95)] sm:text-xs">
+            <p className={`leading-snug sm:leading-5 ${getLogToneClassName(log.tone)}`}>{log.message}</p>
           </div>
         ))}
       </div>
@@ -117,18 +117,18 @@ export function RadarPlayArea({
           return (
             <div
               key={slot.id}
-              className="absolute right-[-14px] z-10 flex -translate-y-1/2 items-center"
+              className="absolute right-0 z-10 flex -translate-y-1/2 items-center sm:right-[-14px]"
               style={{ top: `${slot.topPercent}%` }}
               aria-label={`${slot.label} is ${slot.status}`}
             >
-              <div className="absolute -left-24 flex min-w-20 flex-col items-end pr-2">
-                <span className="rounded-full border border-cyan-200/40 bg-slate-950/85 px-2 py-0.5 text-[10px] font-black tracking-widest text-cyan-100 shadow-[0_0_12px_rgba(103,232,249,0.35)]">
+              <div className="absolute left-0 flex min-w-0 flex-col items-start pr-1 sm:-left-24 sm:items-end sm:pr-2">
+                <span className="rounded-full border border-cyan-200/40 bg-slate-950/85 px-1.5 py-0.5 text-[8px] font-black tracking-wide text-cyan-100 shadow-[0_0_12px_rgba(103,232,249,0.35)] sm:px-2 sm:text-[10px] sm:tracking-widest">
                   Slot {slot.id.replace("cannon-", "")}
                 </span>
               </div>
               {shouldShowPahlawan ? (
                 <div
-                  className="pointer-events-none absolute -left-30 top-1/2 z-0 h-14 w-14 -translate-y-1/2 overflow-hidden drop-shadow-[0_8px_10px_rgba(0,0,0,0.75)]"
+                  className="pointer-events-none absolute -left-14 top-1/2 z-0 h-10 w-10 -translate-y-1/2 overflow-hidden drop-shadow-[0_8px_10px_rgba(0,0,0,0.75)] sm:-left-30 sm:h-14 sm:w-14"
                   aria-hidden="true"
                 >
                   <div
