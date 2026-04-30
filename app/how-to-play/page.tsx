@@ -14,6 +14,15 @@ export const metadata: Metadata = {
   title: "How to Play | Melaka Defense",
   description:
     "Learn how to defend the Melaka strait: objectives, controls, visual logic vs generated code, and the JavaScript player API.",
+  alternates: {
+    canonical: "/how-to-play",
+  },
+  openGraph: {
+    title: "How to Play | Melaka Defense",
+    description:
+      "Learn objectives, controls, visual logic, and the JavaScript API for Melaka Defense.",
+    url: "https://alifasraf.asia/how-to-play",
+  },
 };
 
 type ApiCardProps = {

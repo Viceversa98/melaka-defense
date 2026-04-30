@@ -5,6 +5,14 @@ import { BEST_PRACTICES, LEARNING_GUIDES } from "@/src/features/melaka-defense/c
 export const metadata: Metadata = {
   title: "Learning Guide | Melaka Defense",
   description: "Short examples for cannon logic: simple calls, loops, conditionals, and best practices.",
+  alternates: {
+    canonical: "/learning-guide",
+  },
+  openGraph: {
+    title: "Learning Guide | Melaka Defense",
+    description: "Short examples and best practices for cannon strategy logic in Melaka Defense.",
+    url: "https://alifasraf.asia/learning-guide",
+  },
 };
 
 export default function LearningGuidePage() {
