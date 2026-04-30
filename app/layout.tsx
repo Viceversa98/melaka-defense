@@ -49,6 +49,11 @@ export const metadata: Metadata = {
     description:
       "Defend the Melaka fort with visual strategy blocks and generated JavaScript in a browser-based coding game.",
   },
+  icons: {
+    icon: "/favicon.ico",
+    shortcut: "/favicon.ico",
+    apple: "/favicon.ico",
+  },
   robots: {
     index: true,
     follow: true,
