@@ -26,9 +26,13 @@ import {
   RENTAKA_BULLETS_PER_CANNON_PER_TICK,
   STRAIT_LENGTH,
 } from "./constants";
-import { DEFAULT_CODE } from "./content";
 import { createCannonSlots, createShip, createStartingShip, getWaveShipTotal } from "./lib/game-factories";
 import { getRentakaCannonTopOffset } from "./lib/game-formatters";
+import {
+  DEFAULT_VISUAL_PROGRAM,
+  generateJavaScriptFromVisual,
+  type VisualProgram,
+} from "./lib/visual-program";
 
 const CANNON_FUNCTION_NAMES: CannonFunctionName[] = ["cannon1", "cannon2", "cannon3"];
 
@@ -103,14 +107,15 @@ const getRentakaLoopPermissionByFunctionName = (sourceCode: string) =>
   );
 
 export default function MelakaDefenseGame() {
-  const [code, setCode] = useState(DEFAULT_CODE);
+  const [visualProgram, setVisualProgram] = useState<VisualProgram>(DEFAULT_VISUAL_PROGRAM);
+  const [code, setCode] = useState(() => generateJavaScriptFromVisual(DEFAULT_VISUAL_PROGRAM));
   const [ships, setShips] = useState<Ship[]>(() => [createStartingShip()]);
   const [logs, setLogs] = useState<TerminalLog[]>([
     {
       id: "boot",
       tick: 0,
       tone: "info",
-      message: "Melaka command console online. Write JavaScript to defend the fort.",
+      message: "Melaka command console online. Use Visual logic or read generated JavaScript to defend the fort.",
     },
   ]);
   const [tick, setTick] = useState(0);
@@ -152,6 +157,32 @@ export default function MelakaDefenseGame() {
   const radarWidthRef = useRef(radarWidth);
   const effectTimeoutsRef = useRef<number[]>([]);
   const shotSequenceRef = useRef(0);
+
+  const [isWarRoomOpen, setIsWarRoomOpen] = useState(false);
+  const [isXlViewport, setIsXlViewport] = useState(false);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(min-width: 1280px)");
+    const handleMediaChange = () => {
+      setIsXlViewport(mediaQuery.matches);
+    };
+
+    handleMediaChange();
+    mediaQuery.addEventListener("change", handleMediaChange);
+
+    return () => {
+      mediaQuery.removeEventListener("change", handleMediaChange);
+    };
+  }, []);
+
+  const handleToggleWarRoom = () => {
+    setIsWarRoomOpen((current) => !current);
+  };
+
+  const handleVisualProgramChange = useCallback((next: VisualProgram) => {
+    setVisualProgram(next);
+    setCode(generateJavaScriptFromVisual(next));
+  }, []);
 
   useEffect(() => {
     codeRef.current = code;
@@ -510,6 +541,8 @@ export default function MelakaDefenseGame() {
     setWaveBanner(null);
     setCheckpointWave(1);
     setCheckpointFortHealth(FORT_HEALTH);
+    setVisualProgram(DEFAULT_VISUAL_PROGRAM);
+    setCode(generateJavaScriptFromVisual(DEFAULT_VISUAL_PROGRAM));
   };
 
   const handleTogglePause = () => {
@@ -550,12 +583,6 @@ export default function MelakaDefenseGame() {
     setGameStatus("playing");
     setWaveBanner(null);
     appendLog(`Retrying wave ${retryWave} with ${retryFortHealth} fort HP.`, "warning");
-  };
-
-  const handleEditorChange = (value?: string) => {
-    const nextCode = value ?? "";
-    codeRef.current = nextCode;
-    setCode(nextCode);
   };
 
   useEffect(() => {
@@ -856,7 +883,7 @@ export default function MelakaDefenseGame() {
   ]);
 
   return (
-    <main className="min-h-screen bg-slate-950 text-slate-100">
+    <main className="flex min-h-0 flex-1 flex-col overflow-hidden bg-slate-950 text-slate-100 xl:grid xl:h-full xl:min-h-0 xl:grid-cols-[clamp(340px,38vw,560px)_minmax(0,1fr)] xl:grid-rows-1 xl:overflow-hidden">
       <style>{`
         @keyframes wave-pop {
           0% {
@@ -873,33 +900,38 @@ export default function MelakaDefenseGame() {
           }
         }
       `}</style>
-      <div className="grid min-h-screen grid-cols-1 lg:grid-cols-[minmax(420px,44vw)_1fr]">
-        <WarRoomPanel code={code} handleEditorChange={handleEditorChange} />
-        <RadarPanel
-          isPaused={isPaused}
-          onTogglePause={handleTogglePause}
-          onResetGame={handleResetGame}
-          fortHealth={fortHealth}
-          score={score}
-          wave={wave}
-          waveShipTotal={waveShipTotal}
-          waveShipsSpawned={waveShipsSpawned}
-          tick={tick}
-          cannonSlots={cannonSlots}
-          meriamCooldown={meriamCooldown}
-          meriamCooldownSlotId={meriamCooldownSlotId}
-          logs={logs}
-          ships={ships}
-          projectiles={projectiles}
-          explosions={explosions}
-          radarWidth={radarWidth}
-          waveBanner={waveBanner}
-          gameStatus={gameStatus}
-          checkpointWave={checkpointWave}
-          radarAreaRef={radarAreaRef}
-          handleRetryCheckpoint={handleRetryCheckpoint}
-        />
-      </div>
+      <WarRoomPanel
+        code={code}
+        visualProgram={visualProgram}
+        onVisualProgramChange={handleVisualProgramChange}
+        isWarRoomOpen={isWarRoomOpen}
+        handleToggleWarRoom={handleToggleWarRoom}
+        isXlViewport={isXlViewport}
+      />
+      <RadarPanel
+        isPaused={isPaused}
+        onTogglePause={handleTogglePause}
+        onResetGame={handleResetGame}
+        fortHealth={fortHealth}
+        score={score}
+        wave={wave}
+        waveShipTotal={waveShipTotal}
+        waveShipsSpawned={waveShipsSpawned}
+        tick={tick}
+        cannonSlots={cannonSlots}
+        meriamCooldown={meriamCooldown}
+        meriamCooldownSlotId={meriamCooldownSlotId}
+        logs={logs}
+        ships={ships}
+        projectiles={projectiles}
+        explosions={explosions}
+        radarWidth={radarWidth}
+        waveBanner={waveBanner}
+        gameStatus={gameStatus}
+        checkpointWave={checkpointWave}
+        radarAreaRef={radarAreaRef}
+        handleRetryCheckpoint={handleRetryCheckpoint}
+      />
     </main>
   );
 }
