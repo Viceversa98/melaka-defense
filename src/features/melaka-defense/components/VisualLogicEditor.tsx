@@ -40,6 +40,18 @@ const CANNON_LABELS: Record<CannonFunctionName, string> = {
 const CANNON_ORDER: CannonFunctionName[] = ["cannon1", "cannon2", "cannon3"];
 
 const pathKey = (path: BranchPath) => JSON.stringify(path);
+const summarizeCannonNodes = (nodes: StrategyNode[]): string => {
+  if (nodes.length === 0) {
+    return "No blocks";
+  }
+
+  const labels = nodes.map((node) => nodeSummaryLabel(node));
+  if (labels.length <= 2) {
+    return labels.join(" -> ");
+  }
+
+  return `${labels.slice(0, 2).join(" -> ")} +${labels.length - 2} more`;
+};
 
 const parseDragPayload = (raw: string): DragPayload | null => {
   try {
@@ -160,6 +172,11 @@ export const VisualLogicEditor = ({ visualProgram, onVisualProgramChange }: Visu
   const [dragOverKey, setDragOverKey] = useState<string | null>(null);
   const [paletteInfoId, setPaletteInfoId] = useState<PaletteTemplateId | null>(null);
   const [listInfoKey, setListInfoKey] = useState<string | null>(null);
+  const [expandedCannons, setExpandedCannons] = useState<Record<CannonFunctionName, boolean>>({
+    cannon1: true,
+    cannon2: false,
+    cannon3: false,
+  });
 
   useEffect(() => {
     if (paletteInfoId === null && listInfoKey === null) {
@@ -194,6 +211,13 @@ export const VisualLogicEditor = ({ visualProgram, onVisualProgramChange }: Visu
     setListInfoKey(null);
     setPaletteInfoId(null);
     onVisualProgramChange(DEFAULT_VISUAL_PROGRAM);
+  };
+
+  const handleToggleCannon = (cannonName: CannonFunctionName) => {
+    setExpandedCannons((current) => ({
+      ...current,
+      [cannonName]: !current[cannonName],
+    }));
   };
 
   return (
@@ -279,35 +303,72 @@ export const VisualLogicEditor = ({ visualProgram, onVisualProgramChange }: Visu
         </aside>
 
         <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-1.5 overflow-hidden overscroll-contain sm:gap-2">
-          {CANNON_ORDER.map((cannonName) => (
-            <div
-              key={cannonName}
-              className="flex min-h-0 flex-1 basis-0 flex-col overflow-hidden rounded-lg border border-amber-400/25 bg-slate-900/80 p-1.5 sm:rounded-xl sm:p-2"
-            >
-              <div className="shrink-0">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-amber-200 sm:text-xs">
-                  {CANNON_LABELS[cannonName]}
-                </p>
-                <p className="mt-0.5 hidden text-[8px] text-slate-500 md:block md:text-[9px]">After nearest-ship lock-on</p>
-              </div>
+          {CANNON_ORDER.map((cannonName) => {
+            const isExpanded = expandedCannons[cannonName];
+            const topLevelNodes = visualProgram[cannonName];
+            const summary = summarizeCannonNodes(topLevelNodes);
 
-              <div className="mt-1 flex min-h-0 flex-1 overflow-hidden">
-                <StrategyListView
-                  cannonName={cannonName}
-                  listPath={[]}
-                  nodes={visualProgram[cannonName]}
-                  visualProgram={visualProgram}
-                  dragOverKey={dragOverKey}
-                  setDragOverKey={setDragOverKey}
-                  listInfoKey={listInfoKey}
-                  setListInfoKey={setListInfoKey}
-                  handleToggleTreeInfo={handleToggleTreeInfo}
-                  onApplyProgram={onVisualProgramChange}
-                  nestClassName=""
-                />
+            return (
+              <div
+                key={cannonName}
+                className={`flex min-h-0 flex-col overflow-hidden rounded-lg border border-amber-400/25 bg-slate-900/80 p-1.5 sm:rounded-xl sm:p-2 ${
+                  isExpanded ? "flex-1 basis-0" : "shrink-0"
+                }`}
+              >
+                <div className="shrink-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-amber-200 sm:text-xs">
+                      {CANNON_LABELS[cannonName]}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        handleToggleCannon(cannonName);
+                      }}
+                      onKeyDown={(event) => {
+                        if (event.key !== "Enter" && event.key !== " ") {
+                          return;
+                        }
+
+                        event.preventDefault();
+                        handleToggleCannon(cannonName);
+                      }}
+                      className="rounded border border-amber-300/40 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-amber-100 hover:bg-amber-300/10 focus:outline-none focus:ring-2 focus:ring-amber-200"
+                      aria-expanded={isExpanded}
+                      aria-label={`${isExpanded ? "Collapse" : "Expand"} ${CANNON_LABELS[cannonName]}`}
+                    >
+                      {isExpanded ? "Close" : "Open"}
+                    </button>
+                  </div>
+                  <p className="mt-0.5 hidden text-[8px] text-slate-500 md:block md:text-[9px]">After nearest-ship lock-on</p>
+                </div>
+
+                {isExpanded ? (
+                  <div className="mt-1 flex min-h-0 flex-1 overflow-hidden">
+                    <StrategyListView
+                      cannonName={cannonName}
+                      listPath={[]}
+                      nodes={topLevelNodes}
+                      visualProgram={visualProgram}
+                      dragOverKey={dragOverKey}
+                      setDragOverKey={setDragOverKey}
+                      listInfoKey={listInfoKey}
+                      setListInfoKey={setListInfoKey}
+                      handleToggleTreeInfo={handleToggleTreeInfo}
+                      onApplyProgram={onVisualProgramChange}
+                      nestClassName=""
+                    />
+                  </div>
+                ) : (
+                  <div className="mt-1 rounded border border-slate-700/70 bg-slate-950/60 px-2 py-1">
+                    <p className="truncate text-[10px] text-slate-300" title={summary}>
+                      {summary}
+                    </p>
+                  </div>
+                )}
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>
