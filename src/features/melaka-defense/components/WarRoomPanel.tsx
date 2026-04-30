@@ -98,6 +98,17 @@ export const WarRoomPanel = ({
           <div className="min-w-0 flex-1">
             <p className="text-[10px] font-semibold uppercase tracking-[0.35em] text-amber-300 sm:text-xs">The War Room</p>
             <h1 className="mt-0.5 text-lg font-bold text-white sm:mt-2 sm:text-3xl">Melaka Empire Defense</h1>
+            <p className="mt-1 text-[10px] text-slate-400 sm:text-xs">
+              Created by{" "}
+              <a
+                href="https://alifasraf.asia"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-cyan-200 underline-offset-2 hover:text-cyan-100 hover:underline"
+              >
+                alifasraf.asia
+              </a>
+            </p>
           </div>
           <div className="flex shrink-0 flex-col items-stretch gap-2 sm:flex-row sm:items-center">
             <Link
